@@ -1,0 +1,7 @@
+# files of mariadb and sql server files
+/db/
+
+# code editors folders
+.vscode
+
+.idea

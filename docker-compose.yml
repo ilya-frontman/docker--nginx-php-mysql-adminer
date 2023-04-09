@@ -1,0 +1,50 @@
+version: "3"
+
+services:
+  nginx_web:
+    image: nginx:alpine
+    restart: always
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./app:/var/www/html:rw
+    depends_on:
+      - php_fpm
+    ports:
+      - $NGINX_PORT:$NGINX_PORT
+
+  php_fpm:
+    image: php:fpm-alpine
+    restart: always
+    # environment:
+    # - WORDPRESS_DB_HOST=mariadb
+    # - WORDPRESS_DB_NAME=$DB_NAME
+    # - WORDPRESS_DB_USER=$DB_USER
+    # - WORDPRESS_DB_PASSWORD=$DB_PASSWORD
+    # - WORDPRESS_TABLE_PREFIX=$DB_PREFIX_TABLE
+    # - MYSQL_ROOT_PASSWORD=$DB_ROOT_PASSWORD
+    volumes:
+      - ./app:/var/www/html:rw
+      - ./php/php.ini:/usr/local/etc/php/php.ini
+    depends_on:
+      - mysqldb
+
+  mysqldb:
+    image: mysql:debian
+    restart: always
+    environment:
+      - MYSQL_DATABASE=$DB_NAME
+      - MYSQL_USER=$DB_USER
+      - MYSQL_PASSWORD=$DB_PASSWORD
+      - MYSQL_ROOT_PASSWORD=$DB_ROOT_PASSWORD
+    volumes:
+      - ./db:/var/lib/mysql:rw
+
+  adm:
+    image: adminer:latest
+    restart: always
+    environment:
+      - ADMINER_DEFAULT_SERVER=mysqldb
+    ports:
+      - $ADM_PORT:$ADM_PORT
+    depends_on:
+      - mysqldb
